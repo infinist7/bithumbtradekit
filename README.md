@@ -12,18 +12,18 @@
 
 ## 📦 설치 방법
 
-### pip로 설치 (권장)
-
+### testpypi로 설치
 ```bash
-pip install bithumb-trader
+pip install -i https://test.pypi.org/simple --extra-index-url https://pypi.org/simple bithumbtradekit==0.1.3
+
 ```
 
 ### 개발 버전 설치
 
 ```bash
-git clone https://github.com/infinist/bithumbtradekit.git
-cd bithumb-trader
-pip install -e .
+git clone https://github.com/infinist7/bithumbtradekit.git
+cd bithumbtradekit
+pip install -e 
 ```
 
 ## 🔧 설정 방법
@@ -35,39 +35,81 @@ pip install -e .
 3. Access Key와 Secret Key를 안전한 곳에 보관
 
 ## 🚀 사용 방법
-### Python 코드에서 사용
 
 ```python
-from bithumb_trader import BithumbClient, MarketData, Account, Trading
+from bithumbtradekit import BithumbClient, MarketData, Account, Trading
 
-# 클라이언트 초기화
-client = BithumbClient(access_key="your_access_key", secret_key="your_secret_key")
+# ========== MarketData ==========
 
-# 시장 데이터 조회
-price = MarketData.get_current_price("BTC")
+# 마켓 코드 조회
+coinlist = MarketData.get_market_codes()
+print(f"마켓 코드: {coinlist}")
+
+# 현재가 조회 
+price = MarketData.get_current_price("KRW-BTC")
 print(f"비트코인 현재가: {price:,.0f}원")
 
-daily_data = MarketData.get_daily_data("BTC", count=10)
+# 일봉 데이터 조회 
+daily_data = MarketData.get_daily_data("KRW-BTC", count=10) # 최근 10일 자료
 print(daily_data.head())
 
-# 계좌 관리
+# 주봉 데이터 조회 
+weekly_data = MarketData.get_weekly_data("KRW-BTC", count=10) # 최근 10주 자료
+print(weekly_data.head())
+
+# 월봉 데이터 조회 
+monthly_data = MarketData.get_monthly_data("KRW-BTC", count=10) # 최근 10개월 자료
+print(monthly_data.head())
+
+# 분봉 데이터 조회(unit=분 단위)
+minutes_data = MarketData.get_minutes_data("KRW-BTC", unit=1,  count=10) # 최근 10개 {unit}분봉 자료
+print(minutes_data.head())
+
+
+# ========== 클라이언트 초기화 (계좌/거래 기능 사용시 필요) ==========
+client = BithumbClient(access_key="your_access_key", secret_key="your_secret_key")
+
+
+# ========== Account ==========
 account = Account(client)
+
+# 잔고 조회
 krw_balance = account.get_krw_balance()
 print(f"KRW 잔고: {krw_balance:,.0f}원")
 
+
+# 특정 코인 잔고 및 평균매수가 조회 (코인 심볼만 입력, KRW-BTC 형식 아님)
 btc_balance, avg_price = account.get_coin_balance("BTC")
 print(f"BTC 보유량: {btc_balance}")
 
-# 거래 실행
+# 보유한 전체 자산 조회 
+account_info = account.get_all_balances()
+print(f"자산 정보: {account_info}")
+
+
+# ========== Trading ==========
 trading = Trading(client)
 
-# 매수 주문
-buy_result = trading.place_buy_order("KRW-BTC", 0.001, 50000000)
+# 지정가 매수 주문(volume: 거래량, price: 가격)
+buy_result = trading.place_buy_order("KRW-BTC", volume=0.000001, price=10000)
 print(f"매수 주문 결과: {buy_result}")
 
-# 매도 주문 (시장가)
-sell_result = trading.place_sell_order("KRW-ETH", 0.1, ord_type="market")
+# 지정가 매도 주문(volume: 거래량, price: 가격)
+sell_result = trading.place_sell_order("KRW-BTC", volume=0.000001, price=10000)
 print(f"매도 주문 결과: {sell_result}")
+
+# 시장가 매도 주문(volume: 거래량)
+sell_result = trading.place_sell_order("KRW-BTC", volume=0.000001, ord_type="market")
+print(f"매도 주문 결과: {sell_result}")
+
+# 주문 목록 조회
+trading.get_orders()
+
+# 주문 상태 조회(개별 주문에 부여된 UUID를 활용)
+trading.get_order_status('uuid')
+
+# 주문 취소(개별 주문에 부여된 UUID를 활용)
+trading.cancel_order('uuid')
 ```
 
 ## 📚 API 문서
@@ -84,7 +126,7 @@ print(f"매도 주문 결과: {sell_result}")
 ### Account 클래스
 
 - `get_krw_balance()`: KRW 잔고 조회
-- `get_coin_balance(coin)`: 특정 코인 잔고 조회
+- `get_coin_balance(coin)`: 특정 코인 잔고 조회 (코인 심볼만 입력: "BTC", "ETH")
 - `get_all_balances()`: 전체 자산 조회
 
 ### Trading 클래스

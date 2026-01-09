@@ -5,7 +5,7 @@ Bithumb API 2.0 기반 코인 자동매매 도구
 코인 자동매매를 수행할 수 있는 기능들을 제공합니다.
 """
 
-__version__ = "0.1.0"
+__version__ = "0.1.3"
 __author__ = "infinist"
 __email__ = "infinist@naver.com"
 
