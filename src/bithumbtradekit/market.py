@@ -30,12 +30,12 @@ class MarketData:
         특정 코인의 현재가 조회
 
         Args:
-            coin: 코인 심볼 (예: 'BTC', 'ETH')
+            coin: 마켓 코드 (예: 'KRW-BTC', 'KRW-ETH')
 
         Returns:
             float: 현재가
         """
-        url = f"https://api.bithumb.com/v1/ticker?markets=KRW-{coin.upper()}"
+        url = f"https://api.bithumb.com/v1/ticker?markets={coin.upper()}"
         headers = {"accept": "application/json"}
 
         response = requests.get(url, headers=headers)
@@ -49,13 +49,13 @@ class MarketData:
 
         Args:
             url: API 엔드포인트 URL
-            coin: 코인 심볼
+            coin: 마켓 코드 (예: 'KRW-BTC', 'KRW-ETH')
             count: 조회할 데이터 개수
 
         Returns:
             pd.DataFrame: 캔들 데이터
         """
-        params = {"market": f"KRW-{coin.upper()}", "count": count}
+        params = {"market": f"{coin.upper()}", "count": count}
         headers = {"accept": "application/json"}
         resp = requests.get(url, headers=headers, params=params)
         resp.raise_for_status()
@@ -80,26 +80,31 @@ class MarketData:
                 "change_rate": "change_rate",
             }
         )
-        df = df[
-            ["date", "open", "close", "high", "low", "change_rate", "volume", "value"]
-        ]
+
+        # 선택할 컬럼 리스트 (존재하는 것만)
+        base_columns = ["date", "open", "close", "high", "low"]
+        optional_columns = ["change_rate", "volume", "value"]
+        columns = base_columns + [c for c in optional_columns if c in df.columns]
+
+        df = df[columns]
         df["date"] = pd.to_datetime(df["date"])
         df = df.sort_values("date").reset_index(drop=True)
         return df
 
     @staticmethod
-    def get_minutes_data(coin: str, count: int = 30) -> pd.DataFrame:
+    def get_minutes_data(coin: str, unit: int = 1, count: int = 30) -> pd.DataFrame:
         """
         분봉 데이터 조회
 
         Args:
-            coin: 코인 심볼 (예: 'BTC', 'ETH')
+            coin: 마켓 코드 (예: 'KRW-BTC', 'KRW-ETH')
+            unit: 분봉 단위 (1, 3, 5, 10, 15, 30, 60, 240)
             count: 조회할 데이터 개수
 
         Returns:
             pd.DataFrame: 분봉 데이터
         """
-        url = "https://api.bithumb.com/v1/minutes/1"
+        url = f"https://api.bithumb.com/v1/candles/minutes/{unit}"
         return MarketData._get_candle_data(url, coin, count)
 
     @staticmethod
@@ -108,7 +113,7 @@ class MarketData:
         일봉 데이터 조회
 
         Args:
-            coin: 코인 심볼 (예: 'BTC', 'ETH')
+            coin: 마켓 코드 (예: 'KRW-BTC', 'KRW-ETH')
             count: 조회할 데이터 개수
 
         Returns:
@@ -123,7 +128,7 @@ class MarketData:
         주봉 데이터 조회
 
         Args:
-            coin: 코인 심볼 (예: 'BTC', 'ETH')
+            coin: 마켓 코드 (예: 'KRW-BTC', 'KRW-ETH')
             count: 조회할 데이터 개수
 
         Returns:
@@ -138,7 +143,7 @@ class MarketData:
         월봉 데이터 조회
 
         Args:
-            coin: 코인 심볼 (예: 'BTC', 'ETH')
+            coin: 마켓 코드 (예: 'KRW-BTC', 'KRW-ETH')
             count: 조회할 데이터 개수
 
         Returns:

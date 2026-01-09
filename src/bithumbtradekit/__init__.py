@@ -7,7 +7,7 @@ Bithumb API 2.0 기반 코인 자동매매 도구
 
 __version__ = "0.1.3"
 __author__ = "infinist"
-__email__ = "infinist@naver.com"
+__email__ = "infinist7@naver.com"
 
 from .client import BithumbClient
 from .market import MarketData

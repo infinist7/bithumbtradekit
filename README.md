@@ -1,18 +1,17 @@
-# Bithumb Trader
-
-🚀 **Bithumb API 2.0 기반 코인 매매 도구**
+**Bithumb API 2.0 기반 코인 매매 도구**
 
 빗썸(Bithumb) 거래소의 공식 API를 활용하여 코인 매매를 수행할 수 있는 Python 패키지입니다.
 
-## ✨ 주요 기능
+## 주요 기능
 
-- 📊 **시장 데이터 조회**: 실시간 가격, 캔들 데이터 (분/일/주/월봉)
-- 💰 **계좌 확인**: 잔고 조회, 보유 코인 현황
-- 📈 **거래**: 지정가/시장가 매수/매도, 주문 관리
+- **시장 데이터 조회**: 실시간 가격, 캔들 데이터 (분/일/주/월봉)
+- **계좌 확인**: 잔고 조회, 보유 코인 현황
+- **거래**: 지정가/시장가 매수/매도, 주문 관리
 
-## 📦 설치 방법
+## 설치 방법
 
 ### testpypi로 설치
+
 ```bash
 pip install -i https://test.pypi.org/simple --extra-index-url https://pypi.org/simple bithumbtradekit==0.1.3
 
@@ -23,18 +22,16 @@ pip install -i https://test.pypi.org/simple --extra-index-url https://pypi.org/s
 ```bash
 git clone https://github.com/infinist7/bithumbtradekit.git
 cd bithumbtradekit
-pip install -e 
+pip install -e .
 ```
 
-## 🔧 설정 방법
+## API 키 발급
 
-### 1. API 키 발급
+1. 계좌확인 및 거래 기능 활용을 위해서는 [빗썸 웹사이트](https://www.bithumb.com)에서 API 발급이  
+   필요합니다.
+2. 단순 시장 데이터 조회 기능만을 사용할때는 API 발급이 필요 없습니다.
 
-1. [빗썸 웹사이트](https://www.bithumb.com)에 로그인
-2. 고객센터 → API 관리에서 API 키 발급
-3. Access Key와 Secret Key를 안전한 곳에 보관
-
-## 🚀 사용 방법
+## 사용 방법
 
 ```python
 from bithumbtradekit import BithumbClient, MarketData, Account, Trading
@@ -45,19 +42,19 @@ from bithumbtradekit import BithumbClient, MarketData, Account, Trading
 coinlist = MarketData.get_market_codes()
 print(f"마켓 코드: {coinlist}")
 
-# 현재가 조회 
+# 현재가 조회
 price = MarketData.get_current_price("KRW-BTC")
 print(f"비트코인 현재가: {price:,.0f}원")
 
-# 일봉 데이터 조회 
+# 일봉 데이터 조회
 daily_data = MarketData.get_daily_data("KRW-BTC", count=10) # 최근 10일 자료
 print(daily_data.head())
 
-# 주봉 데이터 조회 
+# 주봉 데이터 조회
 weekly_data = MarketData.get_weekly_data("KRW-BTC", count=10) # 최근 10주 자료
 print(weekly_data.head())
 
-# 월봉 데이터 조회 
+# 월봉 데이터 조회
 monthly_data = MarketData.get_monthly_data("KRW-BTC", count=10) # 최근 10개월 자료
 print(monthly_data.head())
 
@@ -82,7 +79,7 @@ print(f"KRW 잔고: {krw_balance:,.0f}원")
 btc_balance, avg_price = account.get_coin_balance("BTC")
 print(f"BTC 보유량: {btc_balance}")
 
-# 보유한 전체 자산 조회 
+# 보유한 전체 자산 조회
 account_info = account.get_all_balances()
 print(f"자산 정보: {account_info}")
 
@@ -118,7 +115,7 @@ trading.cancel_order('uuid')
 
 - `get_market_codes()`: 거래 가능한 마켓 코드 목록
 - `get_current_price(coin)`: 특정 코인 현재가
-- `get_minutes_data(coin, count)`: 분봉 데이터
+- `get_minutes_data(coin, unit, count)`: 분봉 데이터
 - `get_daily_data(coin, count)`: 일봉 데이터
 - `get_weekly_data(coin, count)`: 주봉 데이터
 - `get_monthly_data(coin, count)`: 월봉 데이터
@@ -126,7 +123,7 @@ trading.cancel_order('uuid')
 ### Account 클래스
 
 - `get_krw_balance()`: KRW 잔고 조회
-- `get_coin_balance(coin)`: 특정 코인 잔고 조회 (코인 심볼만 입력: "BTC", "ETH")
+- `get_coin_balance(coin)`: 특정 코인 잔고 조회 (코인 심볼만 입력: `"BTC"`, `"ETH"`)
 - `get_all_balances()`: 전체 자산 조회
 
 ### Trading 클래스

@@ -26,7 +26,7 @@ class Trading:
         self,
         market: str,
         side: str,
-        volume: float,
+        volume: Optional[float] = None,
         price: Optional[float] = None,
         ord_type: str = "limit",
     ) -> Dict[str, Any]:
@@ -36,9 +36,9 @@ class Trading:
         Args:
             market: 마켓 코드 (예: 'KRW-BTC')
             side: 주문 종류 ('bid': 매수, 'ask': 매도)
-            volume: 주문 수량
-            price: 주문 가격 (시장가 주문시 None)
-            ord_type: 주문 타입 ('limit': 지정가, 'market': 시장가)
+            volume: 주문 수량 (시장가 매수시 None)
+            price: 주문 가격 (시장가 매도시 None, 시장가 매수시 총 주문 금액)
+            ord_type: 주문 타입 ('limit': 지정가, 'market': 시장가 매도, 'price': 시장가 매수)
 
         Returns:
             Dict[str, Any]: 주문 결과
@@ -46,45 +46,48 @@ class Trading:
         data = {
             "market": market,
             "side": side,
-            "volume": str(volume),
             "ord_type": ord_type,
         }
 
-        if ord_type == "limit" and price is not None:
-            data["price"] = str(price)
+        # 지정가 주문: volume + price 필요
+        if ord_type == "limit":
+            if volume is not None:
+                data["volume"] = str(volume)
+            if price is not None:
+                data["price"] = str(price)
+        # 시장가 매수 (price 타입): price(총 주문 금액) 필요
+        elif ord_type == "price":
+            if price is not None:
+                data["price"] = str(price)
+        # 시장가 매도 (market 타입): volume 필요
+        elif ord_type == "market":
+            if volume is not None:
+                data["volume"] = str(volume)
 
         return self.client.post("/v1/orders", data)
 
-    def _send_market_order(
-        self, market: str, side: str, volume: float
-    ) -> Dict[str, Any]:
-        """
-        시장가 주문 전송
-
-        Args:
-            market: 마켓 코드
-            side: 주문 종류
-            volume: 주문 수량
-
-        Returns:
-            Dict[str, Any]: 주문 결과
-        """
-        return self._send_order(market, side, volume, ord_type="market")
-
     def place_buy_order(
-        self, market: str, volume: float, price: float, ord_type: str = "limit"
+        self,
+        market: str,
+        volume: Optional[float] = None,
+        price: Optional[float] = None,
+        ord_type: str = "limit",
     ) -> Dict[str, Any]:
         """
         매수 주문
 
         Args:
             market: 마켓 코드 (예: 'KRW-BTC')
-            volume: 주문 수량
-            price: 주문 가격
-            ord_type: 주문 타입 ('limit': 지정가, 'market': 시장가)
+            volume: 주문 수량 (지정가 주문시 필수)
+            price: 주문 가격 (지정가: 개당 가격, 시장가(price): 총 주문 금액)
+            ord_type: 주문 타입 ('limit': 지정가, 'price': 시장가 매수)
 
         Returns:
             Dict[str, Any]: 주문 결과
+
+        Note:
+            - 지정가 매수: volume과 price 모두 필요 (price = 개당 가격)
+            - 시장가 매수: price만 필요 (price = 총 주문 금액), ord_type='price'
         """
         return self._send_order(market, "bid", volume, price, ord_type)
 
@@ -107,10 +110,7 @@ class Trading:
         Returns:
             Dict[str, Any]: 주문 결과
         """
-        if ord_type == "market":
-            return self._send_market_order(market, "ask", volume)
-        else:
-            return self._send_order(market, "ask", volume, price, ord_type)
+        return self._send_order(market, "ask", volume, price, ord_type)
 
     def cancel_order(self, order_uuid: str) -> Dict[str, Any]:
         """
