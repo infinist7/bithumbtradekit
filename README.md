@@ -35,35 +35,6 @@ pip install -e .
 3. Access Key와 Secret Key를 안전한 곳에 보관
 
 ## 🚀 사용 방법
-
-### CLI 명령어 사용
-
-```bash
-# 도움말 보기
-bithumb-trader --help
-
-# 거래 가능한 코인 목록 조회
-bithumb-trader market codes
-
-# 비트코인 현재가 조회
-bithumb-trader market price BTC
-
-# 이더리움 일봉 데이터 조회 (최근 20개)
-bithumb-trader market candle ETH -p daily -c 20
-
-# 계좌 잔고 조회
-bithumb-trader account balance
-
-# 비트코인 매수 주문 (0.001 BTC, 50,000,000원)
-bithumb-trader trade buy KRW-BTC 0.001 50000000
-
-# 이더리움 시장가 매도 (0.1 ETH)
-bithumb-trader trade sell KRW-ETH 0.1
-
-# 미체결 주문 목록 조회
-bithumb-trader trade orders
-```
-
 ### Python 코드에서 사용
 
 ```python
